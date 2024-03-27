@@ -4,6 +4,7 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
+import android.widget.Button
 import android.widget.Toast
 import android.window.OnBackInvokedDispatcher
 import androidx.appcompat.R.*
@@ -43,8 +44,8 @@ class NoteAddUpdateActivity : AppCompatActivity() {
             note = Note()
         }
 
-        var actionBarTitle: String
-        var btnTitle: String
+        val actionBarTitle: String
+        val btnTitle: String
 
         if (isEdit) {
             actionBarTitle = getString(R.string.change)
@@ -54,45 +55,57 @@ class NoteAddUpdateActivity : AppCompatActivity() {
                     binding?.editTitle?.setText(note.title)
                     binding?.edtDescription?.setText(note.description)
                 }
-            } else {
-                actionBarTitle = getString(R.string.add)
-                btnTitle = getString(R.string.save)
             }
 
-            supportActionBar?.title = actionBarTitle
-            supportActionBar?.setDisplayHomeAsUpEnabled(true)
 
-            binding?.btnSubmit?.text = btnTitle
-            binding?.btnSubmit?.setOnClickListener {
-                val title = binding?.editTitle?.text.toString().trim()
-                val description = binding?.edtDescription?.text.toString().trim()
-                when {
-                    title.isEmpty() -> {
-                        binding?.editTitle?.error = getString(R.string.empty)
+        } else {
+            actionBarTitle = getString(R.string.add)
+            btnTitle = getString(R.string.save)
+        }
+
+        setActionBarTitle(actionBarTitle)
+        binding?.btnSubmit?.text = btnTitle
+        submitButtonAction(binding?.btnSubmit!!)
+
+    }
+
+    private fun submitButtonAction(button: Button) {
+        button.setOnClickListener {
+            val title = binding?.editTitle?.text.toString().trim()
+            val description = binding?.edtDescription?.text.toString().trim()
+            when {
+                title.isEmpty() -> {
+                    binding?.editTitle?.error = getString(R.string.empty)
+                }
+
+                description.isEmpty() -> {
+                    binding?.edtDescription?.error = getString(R.string.empty)
+                }
+
+                else -> {
+                    note.let { note ->
+                        note?.title = title
+                        note?.description = description
                     }
-                    description.isEmpty() -> {
-                        binding?.edtDescription?.error = getString(R.string.empty)
-                    }
-                    else -> {
+                    if (isEdit) {
+                        noteAddUpdateViewModel.update(note as Note)
+                        showToast(getString(R.string.changed))
+                    } else {
                         note.let { note ->
-                            note?.title = title
-                            note?.description = description
+                            note?.date = DateHelper.getCurrentDate()
                         }
-                        if (isEdit) {
-                            noteAddUpdateViewModel.update(note as Note)
-                            showToast(getString(R.string.changed))
-                        } else {
-                            note.let { note ->
-                                note?.date = DateHelper.getCurrentDate()
-                            }
-                            noteAddUpdateViewModel.insert(note as Note)
-                            showToast(getString(R.string.added))
-                        }
-                        finish()
+                        noteAddUpdateViewModel.insert(note as Note)
+                        showToast(getString(R.string.added))
                     }
+                    finish()
                 }
             }
         }
+    }
+
+    private fun setActionBarTitle(appBarTitle: String) {
+        supportActionBar?.title = appBarTitle
+        supportActionBar?.setDisplayHomeAsUpEnabled(true)
     }
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
