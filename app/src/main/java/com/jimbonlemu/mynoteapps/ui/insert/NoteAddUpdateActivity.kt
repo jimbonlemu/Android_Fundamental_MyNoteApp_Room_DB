@@ -33,6 +33,8 @@ class NoteAddUpdateActivity : AppCompatActivity() {
         _activityNoteAddUpdateBinding = ActivityNoteAddUpdateBinding.inflate(layoutInflater)
         setContentView(binding?.root)
 
+        noteAddUpdateViewModel = obtainViewModel(this)
+
         note = intent.getParcelableExtra<Note>(EXTRA_NOTE)
 
         if (note != null) {
@@ -68,17 +70,14 @@ class NoteAddUpdateActivity : AppCompatActivity() {
                     title.isEmpty() -> {
                         binding?.editTitle?.error = getString(R.string.empty)
                     }
-
                     description.isEmpty() -> {
                         binding?.edtDescription?.error = getString(R.string.empty)
                     }
-
                     else -> {
                         note.let { note ->
                             note?.title = title
                             note?.description = description
                         }
-
                         if (isEdit) {
                             noteAddUpdateViewModel.update(note as Note)
                             showToast(getString(R.string.changed))
