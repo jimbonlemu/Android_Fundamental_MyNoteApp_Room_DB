@@ -141,15 +141,9 @@ class NoteAddUpdateActivity : AppCompatActivity() {
 
     private fun showAlertDialog(type: Int) {
         val isDialogClose = type == ALERT_DIALOG_CLOSE
-        val dialogTitle: String
-        val dialogMessage: String
-        if (isDialogClose) {
-            dialogTitle = getString(R.string.cancel)
-            dialogMessage = getString(R.string.message_cancel)
-        } else {
-            dialogMessage = getString(R.string.message_delete)
-            dialogTitle = getString(R.string.delete)
-        }
+        val dialogTitle = if(isDialogClose)getString(R.string.cancel) else getString(R.string.message_delete)
+        val dialogMessage = if (isDialogClose) getString(R.string.message_cancel) else getString(R.string.delete)
+
         val alertDialogBuilder = AlertDialog.Builder(this)
         with(alertDialogBuilder) {
             setTitle(dialogTitle)
@@ -166,9 +160,7 @@ class NoteAddUpdateActivity : AppCompatActivity() {
                 dialog.cancel()
             }
         }
-
         alertDialogBuilder.create().show()
-
     }
 
     override fun onDestroy() {
