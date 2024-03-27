@@ -79,8 +79,10 @@ class NoteAddUpdateActivity : AppCompatActivity() {
     }
 
     private fun setupAppBar(appBarTitle: String) {
-        supportActionBar?.title = appBarTitle
-        supportActionBar?.setDisplayHomeAsUpEnabled(true)
+        with(supportActionBar!!) {
+            title = appBarTitle
+            setDisplayHomeAsUpEnabled(true)
+        }
     }
 
     private fun submitAction(onClick: Button) {

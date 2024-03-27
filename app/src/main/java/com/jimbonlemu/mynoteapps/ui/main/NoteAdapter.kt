@@ -41,17 +41,19 @@ class NoteAdapter : RecyclerView.Adapter<NoteAdapter.NoteViewHolder>() {
         RecyclerView.ViewHolder(binding.root) {
         fun bind(note: Note) {
             with(binding) {
-                tvItemTitle.text = note.title
-                tvItemDate.text = note.date
-                tvItemDescription.text = note.description
-                cvItemNote.setOnClickListener {
-                    with(it) {
-                        context.startActivity(
-                            Intent(
-                                context,
-                                NoteAddUpdateActivity::class.java
-                            ).putExtra(NoteAddUpdateActivity.EXTRA_NOTE, note)
-                        )
+                with(note) {
+                    tvItemTitle.text = title
+                    tvItemDate.text = date
+                    tvItemDescription.text = description
+                    cvItemNote.setOnClickListener {
+                        with(it) {
+                            context.startActivity(
+                                Intent(
+                                    context,
+                                    NoteAddUpdateActivity::class.java
+                                ).putExtra(NoteAddUpdateActivity.EXTRA_NOTE, note)
+                            )
+                        }
                     }
                 }
             }
