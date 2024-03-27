@@ -11,15 +11,19 @@ import com.jimbonlemu.mynoteapps.helper.ViewModelFactory
 import com.jimbonlemu.mynoteapps.ui.insert.NoteAddUpdateActivity
 
 class MainActivity : AppCompatActivity() {
+
     private var _activityMainBinding: ActivityMainBinding? = null
     private val binding get() = _activityMainBinding
+
     private lateinit var adapter: NoteAdapter
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
         _activityMainBinding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding?.root)
 
-        val mainViewModel = obtainViewModel(this)
+        val mainViewModel = obtainViewModel(this@MainActivity)
         mainViewModel.getAllNotes().observe(this) { noteList ->
             if (noteList != null) {
                 adapter.setListNotes(noteList)
@@ -27,27 +31,31 @@ class MainActivity : AppCompatActivity() {
         }
 
         adapter = NoteAdapter()
-        initNoteAdapter(adapter)
+
+        initRvNotesAdapter(adapter)
 
         binding?.fabAdd?.setOnClickListener {
-            startActivity(Intent(this, NoteAddUpdateActivity::class.java))
+            val intent = Intent(this@MainActivity, NoteAddUpdateActivity::class.java)
+            startActivity(intent)
         }
+    }
 
+    private fun initRvNotesAdapter(noteAdapter: NoteAdapter) {
+        with(binding?.rvNotes!!) {
+            layoutManager = LinearLayoutManager(this@MainActivity)
+            setHasFixedSize(true)
+            adapter = noteAdapter
+        }
     }
 
     private fun obtainViewModel(activity: AppCompatActivity): MainViewModel {
         val factory = ViewModelFactory.getInstance(activity.application)
-        return ViewModelProvider(activity, factory)[MainViewModel::class.java]
-    }
-
-    private fun initNoteAdapter(adapter: NoteAdapter) {
-        binding?.rvNotes?.layoutManager = LinearLayoutManager(this)
-        binding?.rvNotes?.setHasFixedSize(true)
-        binding?.rvNotes?.adapter = adapter
+        return ViewModelProvider(activity, factory).get(MainViewModel::class.java)
     }
 
     override fun onDestroy() {
         super.onDestroy()
         _activityMainBinding = null
     }
+
 }

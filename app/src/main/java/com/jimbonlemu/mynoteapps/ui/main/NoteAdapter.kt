@@ -12,21 +12,30 @@ import com.jimbonlemu.mynoteapps.ui.insert.NoteAddUpdateActivity
 
 class NoteAdapter : RecyclerView.Adapter<NoteAdapter.NoteViewHolder>() {
     private val listNotes = ArrayList<Note>()
-    fun setListNotes(listNotes:List<Note>){
+    fun setListNotes(listNotes: List<Note>) {
         val diffCallback = NoteDiffCallback(this.listNotes, listNotes)
         val diffResult = DiffUtil.calculateDiff(diffCallback)
         this.listNotes.clear()
         this.listNotes.addAll(listNotes)
         diffResult.dispatchUpdatesTo(this)
     }
+
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): NoteViewHolder {
-       val binding = ItemNoteBinding.inflate(LayoutInflater.from(parent.context), parent, false)
-        return NoteViewHolder(binding)
+        return NoteViewHolder(
+            ItemNoteBinding.inflate(
+                LayoutInflater.from(parent.context),
+                parent,
+                false
+            )
+        )
     }
+
+    override fun onBindViewHolder(holder: NoteViewHolder, position: Int) =
+        holder.bind(listNotes[position])
+
 
     override fun getItemCount(): Int = listNotes.size
 
-    override fun onBindViewHolder(holder: NoteViewHolder, position: Int) =  holder.bind(listNotes[position])
 
     inner class NoteViewHolder(private val binding: ItemNoteBinding) :
         RecyclerView.ViewHolder(binding.root) {
@@ -44,7 +53,6 @@ class NoteAdapter : RecyclerView.Adapter<NoteAdapter.NoteViewHolder>() {
                             ).putExtra(NoteAddUpdateActivity.EXTRA_NOTE, note)
                         )
                     }
-
                 }
             }
         }

@@ -6,8 +6,7 @@ import android.view.Menu
 import android.view.MenuItem
 import android.widget.Button
 import android.widget.Toast
-import android.window.OnBackInvokedDispatcher
-import androidx.appcompat.R.*
+import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AlertDialog
 import androidx.lifecycle.ViewModelProvider
 import com.jimbonlemu.mynoteapps.R
@@ -18,10 +17,11 @@ import com.jimbonlemu.mynoteapps.helper.ViewModelFactory
 
 @Suppress("DEPRECATION")
 class NoteAddUpdateActivity : AppCompatActivity() {
+
     companion object {
         const val EXTRA_NOTE = "extra_note"
         const val ALERT_DIALOG_CLOSE = 10
-        const val ALERT_DIALOG_DELETE = 10
+        const val ALERT_DIALOG_DELETE = 20
     }
 
     private var isEdit = false
@@ -29,15 +29,16 @@ class NoteAddUpdateActivity : AppCompatActivity() {
     private lateinit var noteAddUpdateViewModel: NoteAddUpdateViewModel
     private var _activityNoteAddUpdateBinding: ActivityNoteAddUpdateBinding? = null
     private val binding get() = _activityNoteAddUpdateBinding
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
         _activityNoteAddUpdateBinding = ActivityNoteAddUpdateBinding.inflate(layoutInflater)
         setContentView(binding?.root)
 
-        noteAddUpdateViewModel = obtainViewModel(this)
+        noteAddUpdateViewModel = obtainViewModel(this@NoteAddUpdateActivity)
 
-        note = intent.getParcelableExtra<Note>(EXTRA_NOTE)
-
+        note = intent.getParcelableExtra(EXTRA_NOTE)
         if (note != null) {
             isEdit = true
         } else {
@@ -56,21 +57,34 @@ class NoteAddUpdateActivity : AppCompatActivity() {
                     binding?.edtDescription?.setText(note.description)
                 }
             }
-
-
         } else {
             actionBarTitle = getString(R.string.add)
             btnTitle = getString(R.string.save)
         }
 
-        setActionBarTitle(actionBarTitle)
+        setupAppBar(actionBarTitle)
+
         binding?.btnSubmit?.text = btnTitle
-        submitButtonAction(binding?.btnSubmit!!)
+        submitAction(binding?.btnSubmit!!)
+        onBackPressedAction()
 
     }
 
-    private fun submitButtonAction(button: Button) {
-        button.setOnClickListener {
+    private fun onBackPressedAction() {
+        onBackPressedDispatcher.addCallback(object : OnBackPressedCallback(true) {
+            override fun handleOnBackPressed() {
+                showAlertDialog(ALERT_DIALOG_CLOSE)
+            }
+        })
+    }
+
+    private fun setupAppBar(appBarTitle: String) {
+        supportActionBar?.title = appBarTitle
+        supportActionBar?.setDisplayHomeAsUpEnabled(true)
+    }
+
+    private fun submitAction(onClick: Button) {
+        onClick.setOnClickListener {
             val title = binding?.editTitle?.text.toString().trim()
             val description = binding?.edtDescription?.text.toString().trim()
             when {
@@ -103,12 +117,11 @@ class NoteAddUpdateActivity : AppCompatActivity() {
         }
     }
 
-    private fun setActionBarTitle(appBarTitle: String) {
-        supportActionBar?.title = appBarTitle
-        supportActionBar?.setDisplayHomeAsUpEnabled(true)
+    private fun showToast(message: String) {
+        Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
     }
 
-    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
+    override fun onCreateOptionsMenu(menu: Menu): Boolean {
         if (isEdit) {
             menuInflater.inflate(R.menu.menu_form, menu)
         }
@@ -118,24 +131,11 @@ class NoteAddUpdateActivity : AppCompatActivity() {
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
             R.id.action_delete -> showAlertDialog(ALERT_DIALOG_DELETE)
-            id.home -> showAlertDialog(ALERT_DIALOG_CLOSE)
+            android.R.id.home -> showAlertDialog(ALERT_DIALOG_CLOSE)
         }
         return super.onOptionsItemSelected(item)
     }
 
-    override fun getOnBackInvokedDispatcher(): OnBackInvokedDispatcher {
-        showAlertDialog(ALERT_DIALOG_CLOSE)
-        return super.getOnBackInvokedDispatcher()
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
-        _activityNoteAddUpdateBinding = null
-    }
-
-    private fun showToast(text: String) {
-        Toast.makeText(this, text, Toast.LENGTH_SHORT).show()
-    }
 
     private fun showAlertDialog(type: Int) {
         val isDialogClose = type == ALERT_DIALOG_CLOSE
@@ -148,7 +148,6 @@ class NoteAddUpdateActivity : AppCompatActivity() {
             dialogMessage = getString(R.string.message_delete)
             dialogTitle = getString(R.string.delete)
         }
-
         val alertDialogBuilder = AlertDialog.Builder(this)
         with(alertDialogBuilder) {
             setTitle(dialogTitle)
@@ -165,12 +164,18 @@ class NoteAddUpdateActivity : AppCompatActivity() {
                 dialog.cancel()
             }
         }
-        val alertDialog = alertDialogBuilder.create()
-        alertDialog.show()
+
+        alertDialogBuilder.create().show()
+
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        _activityNoteAddUpdateBinding = null
     }
 
     private fun obtainViewModel(activity: AppCompatActivity): NoteAddUpdateViewModel {
         val factory = ViewModelFactory.getInstance(activity.application)
-        return ViewModelProvider(activity, factory)[NoteAddUpdateViewModel::class.java]
+        return ViewModelProvider(activity, factory).get(NoteAddUpdateViewModel::class.java)
     }
 }
